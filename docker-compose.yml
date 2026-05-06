@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:alpine
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: adflow
+      POSTGRES_PASSWORD: adflowpass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  worker:
+    build: .
+    command: celery -A app.celery worker --loglevel=info
+    depends_on:
+      - redis
+      - db
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  pgdata:
